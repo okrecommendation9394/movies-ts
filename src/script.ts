@@ -12,7 +12,7 @@ async function getMovies() {
   movieContainer!.innerHTML = "";
   let name = (<HTMLInputElement>movieInput).value;
   const result = await getMovie(name);
-  const actorNames = result.Actors.split(", ")
+  const actorNames: string = result.Actors.split(", ")
     .map((e: string) => e.split(" ")[0])
     .join(", ");
   const countries: string[] = result.Country.split(", ");
@@ -26,10 +26,10 @@ async function getMovies() {
       };
     });
   });
-  const wrapper = document.createElement("div") as HTMLDivElement;
+  const wrapper = document.createElement("div");
   wrapper.classList.add("wrapper");
   wrapper.innerHTML = `
-        <div>${new Date().getFullYear() - result.Year} years ago</div>
+        <div>${new Date().getFullYear() - Number(result.Year)} years ago</div>
         <div>Actors: ${actorNames}</div>
         <div class='country'>${countries}</div>
         <div class='currency'>${countryInfo.map((elem) => elem.currency)}</div>
@@ -40,11 +40,6 @@ async function getMovies() {
         `;
   movieContainer?.appendChild(wrapper);
 }
-async function getDetails(url: string) {
-  const res = await fetch(url);
-  const data = await res.json();
-  return data;
-}
 async function calculate() {
   movieInfo!.innerHTML = "";
   let movieNames: string[] = [
@@ -52,10 +47,7 @@ async function calculate() {
     (<HTMLInputElement>secondInput).value,
     (<HTMLInputElement>thirdInput).value,
   ];
-  let movieIds = [];
-  let countriesCalc: string[] = [];
-
-  const filmsStat = await Promise.all(
+  const filmsStat: Movie[] = await Promise.all(
     movieNames.map((movieName) => getMovie(movieName))
   ).then((filmInfo) => {
     return filmInfo;
@@ -64,11 +56,14 @@ async function calculate() {
     duration: parseInt(film.Runtime),
     country: String(film.Country),
   }));
-  const countriesArr = [
+  const countriesArr: string[] = [
     ...new Set(statistics.map((film) => film.country.split(", ")).flat()),
   ];
-  const runtime = statistics.reduce((acc, curr) => (acc += curr.duration), 0);
-  const population = await Promise.all(
+  const runtime: number = statistics.reduce(
+    (acc, curr) => (acc += curr.duration),
+    0
+  );
+  const population: number = await Promise.all(
     countriesArr.map((country) => getCountry(country))
   ).then((data) => {
     return data
